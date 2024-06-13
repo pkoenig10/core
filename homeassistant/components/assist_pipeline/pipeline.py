@@ -254,6 +254,28 @@ async def async_create_default_pipeline(
 
 
 @callback
+def _async_get_pipeline_from_conversation_entity(
+    hass: HomeAssistant, entity_id: str
+) -> Pipeline:
+    """Get a pipeline by conversation entity ID."""
+    entity = hass.states.get(entity_id)
+    return Pipeline(
+        id=entity_id,
+        conversation_engine=entity_id,
+        conversation_language=hass.config.language,
+        language=hass.config.language,
+        name=entity.name if entity else entity_id,
+        stt_engine=None,
+        stt_language=None,
+        tts_engine=None,
+        tts_language=None,
+        tts_voice=None,
+        wake_word_entity=None,
+        wake_word_id=None,
+    )
+
+
+@callback
 def async_get_pipeline(hass: HomeAssistant, pipeline_id: str | None = None) -> Pipeline:
     """Get a pipeline by id or the preferred pipeline."""
     pipeline_data: PipelineData = hass.data[DOMAIN]
@@ -261,6 +283,9 @@ def async_get_pipeline(hass: HomeAssistant, pipeline_id: str | None = None) -> P
     if pipeline_id is None:
         # A pipeline was not specified, use the preferred one
         pipeline_id = pipeline_data.pipeline_store.async_get_preferred_item()
+
+    if pipeline_id.startswith("conversation."):
+        return _async_get_pipeline_from_conversation_entity(hass, pipeline_id)
 
     pipeline = pipeline_data.pipeline_store.data.get(pipeline_id)
 
@@ -278,7 +303,16 @@ def async_get_pipelines(hass: HomeAssistant) -> Iterable[Pipeline]:
     """Get all pipelines."""
     pipeline_data: PipelineData = hass.data[DOMAIN]
 
-    return pipeline_data.pipeline_store.data.values()
+    pipelines = list(pipeline_data.pipeline_store.data.values())
+
+    for entity_id in hass.states.async_entity_ids(conversation.DOMAIN):
+        if entity_id == conversation.HOME_ASSISTANT_AGENT:
+            continue
+
+        pipeline = _async_get_pipeline_from_conversation_entity(hass, entity_id)
+        pipelines.append(pipeline)
+
+    return pipelines
 
 
 async def async_update_pipeline(
@@ -1657,6 +1691,12 @@ class PipelineStorageCollectionWebsocket(
         if item_id is None:
             item_id = self.storage_collection.async_get_preferred_item()
 
+        if item_id.startswith("conversation.") and hass.states.get(item_id):
+            connection.send_result(
+                msg["id"], _async_get_pipeline_from_conversation_entity(hass, item_id)
+            )
+            return
+
         if item_id not in self.storage_collection.data:
             connection.send_error(
                 msg["id"],
@@ -1675,7 +1715,7 @@ class PipelineStorageCollectionWebsocket(
         connection.send_result(
             msg["id"],
             {
-                "pipelines": self.storage_collection.async_items(),
+                "pipelines": async_get_pipelines(hass),
                 "preferred_pipeline": self.storage_collection.async_get_preferred_item(),
             },
         )
