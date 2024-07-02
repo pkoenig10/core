@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 
 from homeassistant.components import recorder
 from homeassistant.components.recorder import core, migration, statistics
+from homeassistant.components.recorder.migration import MigrationTask
 from homeassistant.components.recorder.queries import get_migration_changes
-from homeassistant.components.recorder.tasks import StatesContextIDMigrationTask
 from homeassistant.components.recorder.util import (
     execute_stmt_lambda_element,
     session_scope,
@@ -20,7 +20,11 @@ from homeassistant.components.recorder.util import (
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 
-from .common import async_recorder_block_till_done, async_wait_recording_done
+from .common import (
+    MockMigrationTask,
+    async_recorder_block_till_done,
+    async_wait_recording_done,
+)
 
 from tests.common import async_test_home_assistant
 from tests.typing import RecorderInstanceGenerator
@@ -100,7 +104,7 @@ async def test_migration_changes_prevent_trying_to_migrate_again(
         patch.object(core, "States", old_db_schema.States),
         patch.object(core, "Events", old_db_schema.Events),
         patch.object(core, "StateAttributes", old_db_schema.StateAttributes),
-        patch.object(migration.EntityIDMigration, "task", core.RecorderTask),
+        patch.object(migration.EntityIDMigration, "task", MockMigrationTask),
         patch(CREATE_ENGINE_TARGET, new=_create_engine_test),
     ):
         async with async_test_home_assistant() as hass:
@@ -167,4 +171,4 @@ async def test_migration_changes_prevent_trying_to_migrate_again(
             await hass.async_stop()
 
     for task in tasks:
-        assert not isinstance(task, StatesContextIDMigrationTask)
+        assert not isinstance(task, MigrationTask)

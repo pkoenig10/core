@@ -104,16 +104,16 @@ async def test_migrate_times(caplog: pytest.LogCaptureFixture, tmp_path: Path) -
         patch.object(core, "Events", old_db_schema.Events),
         patch(CREATE_ENGINE_TARGET, new=_create_engine_test),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_events_context_ids",
+            "homeassistant.components.recorder.migration.migrate_events_context_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_states_context_ids",
+            "homeassistant.components.recorder.migration.migrate_states_context_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_event_type_ids",
+            "homeassistant.components.recorder.migration.migrate_event_type_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_entity_ids",
+            "homeassistant.components.recorder.migration.migrate_entity_ids",
         ),
         patch("homeassistant.components.recorder.Recorder._post_migrate_entity_ids"),
         patch(
@@ -274,16 +274,16 @@ async def test_migrate_can_resume_entity_id_post_migration(
         patch.object(core, "Events", old_db_schema.Events),
         patch(CREATE_ENGINE_TARGET, new=_create_engine_test),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_events_context_ids",
+            "homeassistant.components.recorder.migration.migrate_events_context_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_states_context_ids",
+            "homeassistant.components.recorder.migration.migrate_states_context_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_event_type_ids",
+            "homeassistant.components.recorder.migration.migrate_event_type_ids",
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_entity_ids",
+            "homeassistant.components.recorder.migration.migrate_entity_ids",
         ),
         patch("homeassistant.components.recorder.Recorder._post_migrate_entity_ids"),
         patch(

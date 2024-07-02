@@ -1417,22 +1417,16 @@ async def async_setup_recorder_instance(
         else None
     )
     migrate_states_context_ids = (
-        recorder.Recorder._migrate_states_context_ids
-        if enable_migrate_context_ids
-        else None
+        migration.migrate_states_context_ids if enable_migrate_context_ids else None
     )
     migrate_events_context_ids = (
-        recorder.Recorder._migrate_events_context_ids
-        if enable_migrate_context_ids
-        else None
+        migration.migrate_events_context_ids if enable_migrate_context_ids else None
     )
     migrate_event_type_ids = (
-        recorder.Recorder._migrate_event_type_ids
-        if enable_migrate_event_type_ids
-        else None
+        migration.migrate_event_type_ids if enable_migrate_event_type_ids else None
     )
     migrate_entity_ids = (
-        recorder.Recorder._migrate_entity_ids if enable_migrate_entity_ids else None
+        migration.migrate_entity_ids if enable_migrate_entity_ids else None
     )
     with (
         patch(
@@ -1451,22 +1445,22 @@ async def async_setup_recorder_instance(
             autospec=True,
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_events_context_ids",
+            "homeassistant.components.recorder.migration.migrate_events_context_ids",
             side_effect=migrate_events_context_ids,
             autospec=True,
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_states_context_ids",
+            "homeassistant.components.recorder.migration.migrate_states_context_ids",
             side_effect=migrate_states_context_ids,
             autospec=True,
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_event_type_ids",
+            "homeassistant.components.recorder.migration.migrate_event_type_ids",
             side_effect=migrate_event_type_ids,
             autospec=True,
         ),
         patch(
-            "homeassistant.components.recorder.Recorder._migrate_entity_ids",
+            "homeassistant.components.recorder.migration.migrate_entity_ids",
             side_effect=migrate_entity_ids,
             autospec=True,
         ),
