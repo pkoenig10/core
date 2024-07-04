@@ -164,6 +164,7 @@ def _async_resolve_default_pipeline_settings(
         stt_languages = language_util.matches(
             pipeline_language,
             stt_engine.supported_languages,
+            country=hass.config.country,
         )
         if stt_languages:
             stt_language = stt_languages[0]
@@ -187,6 +188,7 @@ def _async_resolve_default_pipeline_settings(
         tts_languages = language_util.matches(
             pipeline_language,
             tts_engine.supported_languages,
+            country=hass.config.country,
         )
         if tts_languages:
             tts_language = tts_languages[0]
